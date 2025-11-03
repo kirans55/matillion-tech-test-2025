@@ -7,6 +7,7 @@ import com.matillion.techtest2025.service.DataAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/analysis")
@@ -17,15 +18,17 @@ public class DataAnalysisController {
     private final DataAnalysisRepository dataAnalysisRepository;
 
     // ✅ POST /api/analysis/ingestCsv
-    @PostMapping("/ingestCsv")
-    public ResponseEntity<DataAnalysisResponse> ingestCsv(@RequestBody String csvData) {
-        try {
-            DataAnalysisResponse response = dataAnalysisService.analyzeCsvData(csvData);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
+    @PostMapping(value = "/ingestCsv", consumes = "multipart/form-data")
+    public ResponseEntity<DataAnalysisResponse> ingestCsv(@RequestParam("file") MultipartFile file) {
+      try {
+         String csvData = new String(file.getBytes());
+         DataAnalysisResponse response = dataAnalysisService.analyzeCsvData(csvData);
+         return ResponseEntity.ok(response);
+      } catch (Exception e) {
+         return ResponseEntity.badRequest().build();
+     }
+  }
+
 
     // ✅ GET /api/analysis/{id}
     @GetMapping("/{id}")
